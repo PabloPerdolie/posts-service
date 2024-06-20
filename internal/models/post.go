@@ -1,13 +1,16 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Post struct {
 	ID              string
 	Title           string
 	Content         string
-	Comments        []*Comment
 	CommentsEnabled bool
+	CreatedAt       time.Time
 }
 
 func NewPost(title, content string, commentsEnabled bool) *Post {
@@ -16,5 +19,6 @@ func NewPost(title, content string, commentsEnabled bool) *Post {
 		Title:           title,
 		Content:         content,
 		CommentsEnabled: commentsEnabled,
+		CreatedAt:       time.Now(),
 	}
 }
