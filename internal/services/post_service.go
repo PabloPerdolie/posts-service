@@ -15,19 +15,19 @@ func NewPostService(repo storage.PostRepository) PostService {
 	}
 }
 
-func (s *postService) CreatePost(title, content string, commentsEnabled bool) (error, *models.Post) {
+func (s *postService) CreatePost(title, content string, commentsEnabled bool) (*models.Post, error) {
 	post := models.NewPost(title, content, commentsEnabled)
-	err, p := s.postRepo.AddPost(post)
+	p, err := s.postRepo.AddPost(post)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
-	return nil, &p
+	return &p, nil
 }
 
-func (s *postService) GetPosts() (error, []*models.Post) {
+func (s *postService) GetPosts() ([]*models.Post, error) {
 	return s.postRepo.GetPosts()
 }
 
-func (s *postService) GetPostByID(id string) (error, *models.Post) {
+func (s *postService) GetPostByID(id string) (*models.Post, error) {
 	return s.postRepo.GetPost(id)
 }

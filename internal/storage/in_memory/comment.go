@@ -17,7 +17,7 @@ func NewCommentRepository() storage.CommentRepository {
 	}
 }
 
-func (ct *commentRepository) AddComment(comment *models.Comment) (error, models.Comment) {
+func (ct *commentRepository) AddComment(comment *models.Comment) (models.Comment, error) {
 	ct.commentMutex.Lock()
 	defer ct.commentMutex.Unlock()
 	ct.comments[comment.ID] = comment
@@ -27,10 +27,10 @@ func (ct *commentRepository) AddComment(comment *models.Comment) (error, models.
 			parent.Children = append(parent.Children, comment)
 		}
 	}
-	return nil, *comment
+	return *comment, nil
 }
 
-func (ct *commentRepository) GetComments(postID string) (error, []*models.Comment) {
+func (ct *commentRepository) GetComments(postID string) ([]*models.Comment, error) {
 	ct.commentMutex.RLock()
 	defer ct.commentMutex.RUnlock()
 	comments := make([]*models.Comment, 255)
@@ -39,5 +39,5 @@ func (ct *commentRepository) GetComments(postID string) (error, []*models.Commen
 			comments = append(comments, comment)
 		}
 	}
-	return nil, comments
+	return comments, nil
 }
