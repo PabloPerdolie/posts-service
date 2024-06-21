@@ -15,13 +15,13 @@ func NewPostService(repo storage.PostRepository) PostService {
 	}
 }
 
-func (s *postService) CreatePost(title, content string, commentsEnabled bool) (*models.Post, error) {
+func (s *postService) CreatePost(title, content string, commentsEnabled bool) (error, *models.Post) {
 	post := models.NewPost(title, content, commentsEnabled)
 	err, p := s.postRepo.AddPost(post)
 	if err != nil {
-		return nil, err
+		return err, nil
 	}
-	return &p, nil
+	return nil, &p
 }
 
 func (s *postService) GetPosts() (error, []*models.Post) {
