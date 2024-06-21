@@ -31,3 +31,7 @@ func (s *postService) GetPosts() ([]*models.Post, error) {
 func (s *postService) GetPostByID(id string) (*models.Post, error) {
 	return s.postRepo.GetPost(id)
 }
+
+func (s *postService) ManageComments(postID string, enable bool) (*models.Post, error) {
+	return s.postRepo.ManageComments(postID, enable)
+}

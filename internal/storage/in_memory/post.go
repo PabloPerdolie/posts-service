@@ -47,3 +47,15 @@ func (st *postRepository) GetPost(id string) (*models.Post, error) {
 	}
 	return post, nil
 }
+
+func (st *postRepository) ManageComments(postID string, enable bool) (*models.Post, error) {
+	post, err := st.GetPost(postID)
+	if err != nil {
+		return nil, err
+	}
+	post.CommentsEnabled = enable
+	st.postMutex.Lock()
+	defer st.postMutex.Unlock()
+	st.posts[postID] = post
+	return post, nil
+}

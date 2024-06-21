@@ -6,6 +6,7 @@ type PostRepository interface {
 	AddPost(post *models.Post) (models.Post, error)
 	GetPosts() ([]*models.Post, error)
 	GetPost(id string) (*models.Post, error)
+	ManageComments(postID string, enable bool) (*models.Post, error)
 }
 
 type CommentRepository interface {
