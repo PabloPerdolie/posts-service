@@ -18,14 +18,14 @@ func NewPostRepository() storage.PostRepository {
 	}
 }
 
-func (st *postRepository) AddPost(post *models.Post) (error, models.Post) {
+func (st *postRepository) AddPost(post *models.Post) (models.Post, error) {
 	st.postMutex.Lock()
 	defer st.postMutex.Unlock()
 	st.posts[post.ID] = post
-	return nil, *post
+	return *post, nil
 }
 
-func (st *postRepository) GetPosts() (error, []*models.Post) {
+func (st *postRepository) GetPosts() ([]*models.Post, error) {
 	st.postMutex.RLock()
 	defer st.postMutex.RUnlock()
 	posts := make([]*models.Post, 0, len(st.posts))
@@ -33,17 +33,17 @@ func (st *postRepository) GetPosts() (error, []*models.Post) {
 		posts = append(posts, post)
 	}
 	if len(posts) == 0 {
-		return errors.ErrPostNotFound, nil
+		return nil, errors.ErrPostNotFound
 	}
-	return nil, posts
+	return posts, nil
 }
 
-func (st *postRepository) GetPost(id string) (error, *models.Post) {
+func (st *postRepository) GetPost(id string) (*models.Post, error) {
 	st.postMutex.RLock()
 	defer st.postMutex.RUnlock()
 	post, exists := st.posts[id]
 	if !exists {
-		return errors.ErrPostNotFound, nil
+		return nil, errors.ErrPostNotFound
 	}
-	return nil, post
+	return post, nil
 }

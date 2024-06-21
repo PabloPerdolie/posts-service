@@ -1,6 +1,7 @@
 package in_memory
 
 import (
+	"graphql-comments/internal/errors"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/storage"
 	"sync"
@@ -33,11 +34,16 @@ func (ct *commentRepository) AddComment(comment *models.Comment) (models.Comment
 func (ct *commentRepository) GetComments(postID string) ([]*models.Comment, error) {
 	ct.commentMutex.RLock()
 	defer ct.commentMutex.RUnlock()
-	comments := make([]*models.Comment, 255)
+	comments := make([]*models.Comment, 0, 10)
 	for _, comment := range ct.comments {
 		if comment.PostID == postID && comment.ParentID == nil {
 			comments = append(comments, comment)
 		}
 	}
+
+	if len(comments) == 0 {
+		return nil, errors.ErrCommentsNotFound
+	}
+
 	return comments, nil
 }
