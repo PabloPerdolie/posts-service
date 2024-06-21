@@ -17,6 +17,7 @@ type Comment {
 type Query {
   posts: [Post!]!
   post(id: ID!): Post
+  comments(postId: ID!): [Comment!]!
 }
 
 type Mutation {
