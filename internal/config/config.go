@@ -27,6 +27,6 @@ func InitConfig() error {
 		log.Fatal(err)
 		return err
 	}
-	log.Println("Successfully initialized config")
+	log.Println("initialized config")
 	return nil
 }

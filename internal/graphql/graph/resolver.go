@@ -8,7 +8,6 @@ import (
 	"graphql-comments/internal/graphql/graph/model"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/services"
-	"graphql-comments/internal/storage/in_memory"
 )
 
 type Resolver struct {
@@ -16,10 +15,10 @@ type Resolver struct {
 	commentService services.CommentService
 }
 
-func NewResolver(useInMemory bool) *Resolver {
+func NewResolver(postService services.PostService, commentService services.CommentService) *Resolver {
 	return &Resolver{
-		postService:    services.NewPostService(in_memory.NewPostRepository()),
-		commentService: services.NewCommentService(in_memory.NewCommentRepository()),
+		postService:    postService,
+		commentService: commentService,
 	}
 }
 
