@@ -90,7 +90,17 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 }
 
 func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int, offset *int) ([]*model.Comment, error) {
-	comments, err := r.commentService.GetCommentsByPostID(postID)
+	defaultLimit := 10
+	defaultOffset := 0
+
+	if limit == nil {
+		limit = &defaultLimit
+	}
+	if offset == nil {
+		offset = &defaultOffset
+	}
+
+	comments, err := r.commentService.GetCommentsByPostID(postID, defaultLimit, defaultOffset)
 	if err != nil {
 		return nil, err
 	}

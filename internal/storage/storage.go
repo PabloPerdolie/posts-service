@@ -11,5 +11,5 @@ type PostRepository interface {
 
 type CommentRepository interface {
 	AddComment(comment *models.Comment) (models.Comment, error)
-	GetComments(postID string) ([]*models.Comment, error)
+	GetComments(postID string, limit int, offset int) ([]*models.Comment, error)
 }

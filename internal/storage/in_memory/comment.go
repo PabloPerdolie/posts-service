@@ -31,19 +31,29 @@ func (ct *commentRepository) AddComment(comment *models.Comment) (models.Comment
 	return *comment, nil
 }
 
-func (ct *commentRepository) GetComments(postID string) ([]*models.Comment, error) {
+func (ct *commentRepository) GetComments(postID string, limit int, offset int) ([]*models.Comment, error) {
 	ct.commentMutex.RLock()
 	defer ct.commentMutex.RUnlock()
-	comments := make([]*models.Comment, 0, 10)
+	filteredComments := make([]*models.Comment, 0, 10)
 	for _, comment := range ct.comments {
 		if comment.PostID == postID && comment.ParentID == nil {
-			comments = append(comments, comment)
+			filteredComments = append(filteredComments, comment)
 		}
 	}
 
-	if len(comments) == 0 {
+	if len(filteredComments) == 0 {
 		return nil, errors.ErrCommentsNotFound
 	}
 
-	return comments, nil
+	start := offset
+	end := offset + limit
+
+	if start > len(filteredComments) {
+		start = len(filteredComments)
+	}
+	if end > len(filteredComments) {
+		end = len(filteredComments)
+	}
+
+	return filteredComments[start:end], nil
 }

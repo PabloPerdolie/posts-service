@@ -11,7 +11,7 @@ type PostService interface {
 
 type CommentService interface {
 	CreateComment(postID string, parentID *string, content string) (*models.Comment, error)
-	GetCommentsByPostID(postID string) ([]*models.Comment, error)
+	GetCommentsByPostID(postID string, limit int, offset int) ([]*models.Comment, error)
 	SubscribeToComments(postID string) (<-chan *models.Comment, error)
 	notifyCommentAdded(comment *models.Comment)
 }

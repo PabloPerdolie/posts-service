@@ -44,8 +44,8 @@ func (s *commentService) CreateComment(postID string, parentID *string, content 
 	return &com, nil
 }
 
-func (s *commentService) GetCommentsByPostID(postID string) ([]*models.Comment, error) {
-	return s.commentRepo.GetComments(postID)
+func (s *commentService) GetCommentsByPostID(postID string, limit int, offset int) ([]*models.Comment, error) {
+	return s.commentRepo.GetComments(postID, limit, offset)
 }
 
 func (s *commentService) SubscribeToComments(postID string) (<-chan *models.Comment, error) {
