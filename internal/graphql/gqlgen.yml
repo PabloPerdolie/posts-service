@@ -13,16 +13,16 @@ exec:
 #   package: generated
 
 # Where should any generated models go?
-model:
-  filename: graph/model/models_gen.go
-  package: model
+#model:
+#  filename: graph/model/models_gen.go
+#  package: model
 
 # Where should the resolver implementations go?
 resolver:
   layout: single-file
   dir: graph
   package: graph
-  filename: resolver.go
+  filename: graph/resolver.go
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

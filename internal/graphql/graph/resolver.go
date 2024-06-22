@@ -89,7 +89,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*model.Post, error
 	}, nil
 }
 
-func (r *queryResolver) Comments(ctx context.Context, postID string) ([]*model.Comment, error) {
+func (r *queryResolver) Comments(ctx context.Context, postID string, limit *int, offset *int) ([]*model.Comment, error) {
 	comments, err := r.commentService.GetCommentsByPostID(postID)
 	if err != nil {
 		return nil, err
