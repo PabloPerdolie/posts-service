@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gorilla/websocket"
 	"graphql-comments/internal/config"
 	"graphql-comments/internal/graphql/graph"
 	"graphql-comments/internal/graphql/graph/generated"
@@ -50,9 +52,22 @@ func (a *App) Run() error {
 }
 
 func (a *App) initServer(ctx context.Context) error {
-	a.gqlServer = handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: graph.NewResolver(a.serviceProvider.postService, a.serviceProvider.commentService),
 	}))
+
+	srv.AddTransport(transport.Websocket{
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
+	})
+	a.gqlServer = srv
+
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", a.gqlServer)
+
 	return nil
 }
 
@@ -75,8 +90,6 @@ func (a *App) runServer() error {
 	if port == "" {
 		port = defaultPort
 	}
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", a.gqlServer)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
