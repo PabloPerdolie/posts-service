@@ -9,18 +9,23 @@ import (
 
 type commentService struct {
 	commentRepo storage.CommentRepository
+	postRepo    storage.PostRepository
 	subscribers map[string][]chan *models.Comment
 	mu          sync.RWMutex
 }
 
-func NewCommentService(repo storage.CommentRepository) CommentService {
+func NewCommentService(comRepo storage.CommentRepository, postRep storage.PostRepository) CommentService {
 	return &commentService{
-		commentRepo: repo,
+		commentRepo: comRepo,
+		postRepo:    postRep,
 		subscribers: make(map[string][]chan *models.Comment),
 	}
 }
 
 func (s *commentService) CreateComment(postID string, parentID *string, content string) (*models.Comment, error) {
+	if _, err := s.postRepo.GetPost(postID); err != nil {
+		return nil, err
+	}
 	if len(content) > 2000 {
 		return nil, errors.ErrOutOfLength
 	}
