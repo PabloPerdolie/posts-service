@@ -5,10 +5,13 @@ package model
 type Comment struct {
 	ID        string     `json:"id"`
 	PostID    string     `json:"postId"`
-	ParentID  *string    `json:"parentId"`
+	ParentID  *string    `json:"parentId,omitempty"`
 	Content   string     `json:"content"`
 	CreatedAt string     `json:"createdAt"`
 	Children  []*Comment `json:"children"`
+}
+
+type Mutation struct {
 }
 
 type Post struct {
@@ -16,4 +19,10 @@ type Post struct {
 	Title           string `json:"title"`
 	Content         string `json:"content"`
 	CommentsEnabled bool   `json:"commentsEnabled"`
+}
+
+type Query struct {
+}
+
+type Subscription struct {
 }
