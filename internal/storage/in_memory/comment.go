@@ -4,6 +4,7 @@ import (
 	"graphql-comments/internal/errors"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/storage"
+	"sort"
 	"sync"
 )
 
@@ -44,6 +45,10 @@ func (ct *commentRepository) GetComments(postID string, limit int, offset int) (
 	if len(filteredComments) == 0 {
 		return nil, errors.ErrCommentsNotFound
 	}
+
+	sort.Slice(filteredComments, func(i, j int) bool {
+		return filteredComments[i].CreatedAt.Before(filteredComments[j].CreatedAt)
+	})
 
 	start := offset
 	end := offset + limit
