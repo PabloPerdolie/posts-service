@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	graphql1 "graphql-comments/internal/graphql"
+	graphql1 "graphql-comments/internal/graphql/graph/model"
 	"io"
 	"strconv"
 	"sync"

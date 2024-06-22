@@ -24,7 +24,7 @@ func newServiceProvider(useInMemory bool) *serviceProvider {
 		//sp.postRepo = db.NewPostRepository()
 	}
 
-	sp.commentService = services.NewCommentService(sp.commentRepo)
+	sp.commentService = services.NewCommentService(sp.commentRepo, sp.postRepo)
 	sp.postService = services.NewPostService(sp.postRepo)
 
 	return sp
