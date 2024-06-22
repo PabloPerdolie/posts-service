@@ -23,8 +23,12 @@ func NewCommentService(comRepo storage.CommentRepository, postRep storage.PostRe
 }
 
 func (s *commentService) CreateComment(postID string, parentID *string, content string) (*models.Comment, error) {
-	if _, err := s.postRepo.GetPost(postID); err != nil {
+	post, err := s.postRepo.GetPost(postID)
+	if err != nil {
 		return nil, err
+	}
+	if !post.CommentsEnabled {
+		return nil, errors.ErrCommentsEnabled
 	}
 	if len(content) > 2000 {
 		return nil, errors.ErrOutOfLength
