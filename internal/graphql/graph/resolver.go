@@ -8,6 +8,7 @@ import (
 	"graphql-comments/internal/graphql/graph/model"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/services"
+	"time"
 )
 
 type Resolver struct {
@@ -42,18 +43,17 @@ func (r *mutationResolver) CreateComment(ctx context.Context, postID string, par
 }
 
 func (r *mutationResolver) ManageComments(ctx context.Context, postID string, enable bool) (*model.Post, error) {
-	//post, err := r.postService.ManageComments(postID, enable)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//return &model.Post{
-	//	ID:              post.ID,
-	//	Title:           post.Title,
-	//	Content:         post.Content,
-	//	CommentsEnabled: post.CommentsEnabled,
-	//}, nil
-	return nil, nil
+	post, err := r.postService.ManageComments(postID, enable)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Post{
+		ID:              post.ID,
+		Title:           post.Title,
+		Content:         post.Content,
+		CommentsEnabled: post.CommentsEnabled,
+	}, nil
 }
 
 func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
@@ -104,7 +104,33 @@ func (r *queryResolver) Comments(ctx context.Context, postID string) ([]*model.C
 }
 
 func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) (<-chan *model.Comment, error) {
-	panic("not implemented")
+	commentChan := make(chan *model.Comment)
+
+	go func() {
+		defer close(commentChan)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				comments, err := r.commentService.GetCommentsByPostID(postID)
+				if err == nil {
+					for _, comment := range comments {
+						commentChan <- &model.Comment{
+							ID:        comment.ID,
+							PostID:    comment.PostID,
+							ParentID:  comment.ParentID,
+							Content:   comment.Content,
+							CreatedAt: comment.CreatedAt.String(),
+						}
+					}
+				}
+				time.Sleep(5 * time.Second)
+			}
+		}
+	}()
+
+	return commentChan, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
