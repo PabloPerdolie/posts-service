@@ -4,15 +4,19 @@ import (
 	"graphql-comments/internal/errors"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/storage"
+	"sync"
 )
 
 type commentService struct {
 	commentRepo storage.CommentRepository
+	subscribers map[string][]chan *models.Comment
+	mu          sync.RWMutex
 }
 
 func NewCommentService(repo storage.CommentRepository) CommentService {
 	return &commentService{
 		commentRepo: repo,
+		subscribers: make(map[string][]chan *models.Comment),
 	}
 }
 
@@ -25,9 +29,36 @@ func (s *commentService) CreateComment(postID string, parentID *string, content 
 	if err != nil {
 		return nil, err
 	}
+
+	s.notifyCommentAdded(comment)
+
 	return &com, nil
 }
 
 func (s *commentService) GetCommentsByPostID(postID string) ([]*models.Comment, error) {
 	return s.commentRepo.GetComments(postID)
+}
+
+func (s *commentService) SubscribeToComments(postID string) (<-chan *models.Comment, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ch := make(chan *models.Comment, 1)
+	s.subscribers[postID] = append(s.subscribers[postID], ch)
+
+	return ch, nil
+}
+
+func (s *commentService) notifyCommentAdded(comment *models.Comment) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	subscribers := s.subscribers[comment.PostID]
+	for _, ch := range subscribers {
+		go func(ch chan<- *models.Comment) {
+			select {
+			case ch <- comment:
+			default:
+			}
+		}(ch)
+	}
 }

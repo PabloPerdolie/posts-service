@@ -8,7 +8,7 @@ import (
 	"graphql-comments/internal/graphql/graph/model"
 	"graphql-comments/internal/models"
 	"graphql-comments/internal/services"
-	"time"
+	"log"
 )
 
 type Resolver struct {
@@ -106,26 +106,27 @@ func (r *queryResolver) Comments(ctx context.Context, postID string) ([]*model.C
 func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) (<-chan *model.Comment, error) {
 	commentChan := make(chan *model.Comment)
 
+	comChan, err := r.commentService.SubscribeToComments(postID)
+	if err != nil {
+		return nil, err
+	}
+
 	go func() {
-		defer close(commentChan)
+		defer close(commentChan) // Закройте канал при завершении подписки
+
 		for {
 			select {
 			case <-ctx.Done():
+				log.Println("Subscription ended")
 				return
-			default:
-				comments, err := r.commentService.GetCommentsByPostID(postID)
-				if err == nil {
-					for _, comment := range comments {
-						commentChan <- &model.Comment{
-							ID:        comment.ID,
-							PostID:    comment.PostID,
-							ParentID:  comment.ParentID,
-							Content:   comment.Content,
-							CreatedAt: comment.CreatedAt.String(),
-						}
-					}
+			case comment := <-comChan:
+				commentChan <- &model.Comment{
+					ID:        comment.ID,
+					PostID:    comment.PostID,
+					ParentID:  comment.ParentID,
+					Content:   comment.Content,
+					CreatedAt: comment.CreatedAt.String(),
 				}
-				time.Sleep(5 * time.Second)
 			}
 		}
 	}()
