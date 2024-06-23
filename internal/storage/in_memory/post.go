@@ -18,11 +18,11 @@ func NewPostRepository() storage.PostRepository {
 	}
 }
 
-func (st *postRepository) AddPost(post *models.Post) (models.Post, error) {
+func (st *postRepository) AddPost(post *models.Post) (*models.Post, error) {
 	st.postMutex.Lock()
 	defer st.postMutex.Unlock()
 	st.posts[post.ID] = post
-	return *post, nil
+	return post, nil
 }
 
 func (st *postRepository) GetPosts() ([]*models.Post, error) {

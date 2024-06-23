@@ -41,7 +41,7 @@ func (s *commentService) CreateComment(postID string, parentID *string, content 
 
 	s.notifyCommentAdded(comment)
 
-	return &com, nil
+	return com, nil
 }
 
 func (s *commentService) GetCommentsByPostID(postID string, limit int, offset int) ([]*models.Comment, error) {

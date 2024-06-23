@@ -40,7 +40,10 @@ func (sp *serviceProvider) initServices(useInMemory bool) error {
 	if useInMemory {
 		sp.inMemoryRepo()
 	} else {
-		return sp.postgresRepo()
+		err := sp.postgresRepo()
+		if err != nil {
+			return err
+		}
 	}
 	sp.commentService = services.NewCommentService(sp.commentRepo, sp.postRepo)
 	sp.postService = services.NewPostService(sp.postRepo)

@@ -21,7 +21,7 @@ func (s *postService) CreatePost(title, content string, commentsEnabled bool) (*
 	if err != nil {
 		return nil, err
 	}
-	return &p, nil
+	return p, nil
 }
 
 func (s *postService) GetPosts() ([]*models.Post, error) {

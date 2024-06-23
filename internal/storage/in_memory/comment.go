@@ -19,7 +19,7 @@ func NewCommentRepository() storage.CommentRepository {
 	}
 }
 
-func (ct *commentRepository) AddComment(comment *models.Comment) (models.Comment, error) {
+func (ct *commentRepository) AddComment(comment *models.Comment) (*models.Comment, error) {
 	ct.commentMutex.Lock()
 	defer ct.commentMutex.Unlock()
 	ct.comments[comment.ID] = comment
@@ -29,7 +29,7 @@ func (ct *commentRepository) AddComment(comment *models.Comment) (models.Comment
 			parent.Children = append(parent.Children, comment)
 		}
 	}
-	return *comment, nil
+	return comment, nil
 }
 
 func (ct *commentRepository) GetComments(postID string, limit int, offset int) ([]*models.Comment, error) {
