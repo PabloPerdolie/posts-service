@@ -1,7 +1,7 @@
 .env
 .idea
 docker-compose.yaml
-Dockerfile
-compose.yaml
+#Dockerfile
+#compose.yaml
 .dockerignore
 README.Docker.md
