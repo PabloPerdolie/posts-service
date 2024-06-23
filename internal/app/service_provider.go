@@ -27,7 +27,7 @@ func (sp *serviceProvider) postgresRepo() error {
 		return err
 	}
 	sp.postRepo = postgres.NewPostRepository(db)
-	sp.commentRepo = postgres.NewCommentRepository(db, sp.postRepo)
+	sp.commentRepo = postgres.NewCommentRepository(db)
 	return nil
 }
 
