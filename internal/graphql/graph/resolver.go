@@ -122,7 +122,7 @@ func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) 
 	}
 
 	go func() {
-		defer close(commentChan) // Закройте канал при завершении подписки
+		defer close(commentChan)
 
 		for {
 			select {
