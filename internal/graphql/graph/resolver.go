@@ -25,12 +25,16 @@ func NewResolver(postService services.PostService, commentService services.Comme
 
 func (r *mutationResolver) CreatePost(ctx context.Context, title string, content string, commentsEnabled bool) (*model.Post, error) {
 	post, err := r.postService.CreatePost(title, content, commentsEnabled)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 	return &model.Post{
 		ID:              post.ID,
 		Title:           post.Title,
 		Content:         post.Content,
 		CommentsEnabled: post.CommentsEnabled,
-	}, err
+	}, nil
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, postID string, parentID *string, content string) (*model.Comment, error) {
