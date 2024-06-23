@@ -81,8 +81,8 @@ func (a *App) initConfig(_ context.Context) error {
 }
 
 func (a *App) initServiceProvider(_ context.Context) error {
-	a.serviceProvider = newServiceProvider(config.CONFIG.UseInMemory)
-	return nil
+	a.serviceProvider = newServiceProvider()
+	return a.serviceProvider.initServices(config.CONFIG.UseInMemory)
 }
 
 func (a *App) runServer() error {

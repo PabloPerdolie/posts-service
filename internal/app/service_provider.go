@@ -1,9 +1,12 @@
 package app
 
 import (
+	"graphql-comments/internal/config"
 	"graphql-comments/internal/services"
 	"graphql-comments/internal/storage"
 	"graphql-comments/internal/storage/in_memory"
+	"graphql-comments/internal/storage/postgres"
+	"graphql-comments/pkg/client"
 )
 
 type serviceProvider struct {
@@ -13,19 +16,33 @@ type serviceProvider struct {
 	postService    services.PostService
 }
 
-func newServiceProvider(useInMemory bool) *serviceProvider {
-	sp := &serviceProvider{}
+func newServiceProvider() *serviceProvider {
+	return &serviceProvider{}
+}
 
-	if useInMemory {
-		sp.commentRepo = in_memory.NewCommentRepository()
-		sp.postRepo = in_memory.NewPostRepository()
-	} else {
-		//sp.commentRepo = db.NewCommentRepository()
-		//sp.postRepo = db.NewPostRepository()
+func (sp *serviceProvider) postgresRepo() error {
+	dbConfig := config.CONFIG.DB
+	db, err := client.InitDB(dbConfig.User, dbConfig.Password, dbConfig.Name, dbConfig.Host, dbConfig.Port)
+	if err != nil {
+		return err
 	}
+	sp.postRepo = postgres.NewPostRepository(db)
+	sp.commentRepo = postgres.NewCommentRepository(db, sp.postRepo)
+	return nil
+}
 
+func (sp *serviceProvider) inMemoryRepo() {
+	sp.commentRepo = in_memory.NewCommentRepository()
+	sp.postRepo = in_memory.NewPostRepository()
+}
+
+func (sp *serviceProvider) initServices(useInMemory bool) error {
+	if useInMemory {
+		sp.inMemoryRepo()
+	} else {
+		return sp.postgresRepo()
+	}
 	sp.commentService = services.NewCommentService(sp.commentRepo, sp.postRepo)
 	sp.postService = services.NewPostService(sp.postRepo)
-
-	return sp
+	return nil
 }
