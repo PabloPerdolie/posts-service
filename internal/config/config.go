@@ -2,7 +2,9 @@ package config
 
 import (
 	"github.com/ilyakaznacheev/cleanenv"
+	"github.com/joho/godotenv"
 	"log"
+	"os"
 )
 
 var CONFIG Config
@@ -26,6 +28,13 @@ func InitConfig() error {
 	if err := cleanenv.ReadConfig("config/config.yml", &CONFIG); err != nil {
 		log.Fatal(err)
 		return err
+	}
+	err := godotenv.Load()
+	if err != nil {
+		return err
+	}
+	if os.Getenv("STORAGE") == "in_memory" {
+		CONFIG.UseInMemory = true
 	}
 	log.Println("initialized config")
 	return nil
