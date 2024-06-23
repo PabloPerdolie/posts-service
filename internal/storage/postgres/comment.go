@@ -34,7 +34,7 @@ func (c *CommentRepository) GetComments(postID string, limit int, offset int) ([
 	query := `
 		SELECT id, post_id, parent_id, content, created_at
 		FROM comments
-		WHERE post_id = $1 AND parent_id IS NULL
+		WHERE post_id = $1
 		ORDER BY created_at
 		LIMIT $2 OFFSET $3`
 	rows, err := c.db.Query(query, postID, limit, offset)
@@ -43,25 +43,31 @@ func (c *CommentRepository) GetComments(postID string, limit int, offset int) ([
 	}
 	defer rows.Close()
 
+	//тут постоянное увеличение слайса и мапы, хз как исправить
+	//тк при обычном переборе через rows.Next() указатель на текущую останется в конце и этот цикл тупо скипнется,
+	//СУПЕР не оптимизированное решение
+	//так нельзя делать, извините
+	commentsMap := make(map[string]*models.Comment)
 	var comments []*models.Comment
 	for rows.Next() {
 		var comment models.Comment
 		if err := rows.Scan(&comment.ID, &comment.PostID, &comment.ParentID, &comment.Content, &comment.CreatedAt); err != nil {
 			return nil, err
 		}
-		comments = append(comments, &comment)
+		commentsMap[comment.ID] = &comment
+		if comment.ParentID == nil {
+			comments = append(comments, &comment)
+		} else {
+			parentComment, exists := commentsMap[*comment.ParentID]
+			if exists {
+				parentComment.Children = append(parentComment.Children, &comment)
+			}
+		}
+
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
-	}
-
-	for _, comment := range comments {
-		replies, err := c.getReplies(comment.ID)
-		if err != nil {
-			return nil, err
-		}
-		comment.Children = replies
 	}
 
 	if len(comments) == 0 {
@@ -69,36 +75,4 @@ func (c *CommentRepository) GetComments(postID string, limit int, offset int) ([
 	}
 
 	return comments, nil
-}
-
-func (c *CommentRepository) getReplies(parentID string) ([]*models.Comment, error) {
-	query := `
-		SELECT id, post_id, parent_id, content, created_at
-		FROM comments
-		WHERE parent_id = $1
-		ORDER BY created_at`
-	rows, err := c.db.Query(query, parentID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var replies []*models.Comment
-	for rows.Next() {
-		var reply models.Comment
-		if err := rows.Scan(&reply.ID, &reply.PostID, &reply.ParentID, &reply.Content, &reply.CreatedAt); err != nil {
-			return nil, err
-		}
-		reply.Children, err = c.getReplies(reply.ID)
-		if err != nil {
-			return nil, err
-		}
-		replies = append(replies, &reply)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return replies, nil
 }
