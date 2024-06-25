@@ -8,6 +8,8 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+    profiles:
+      - with-db
   postgresql:
     container_name: postgres
     environment:
@@ -26,6 +28,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - with-db
+  server-no-db:
+    build:
+      context: .
+      target: final
+    ports:
+      - 8080:8080
+    profiles:
+      - no-db
 volumes:
   db-data:
 
